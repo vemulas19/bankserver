@@ -23,7 +23,7 @@ public class PaymentService {
 		
 		TransactionStatus status = new TransactionStatus();
 		status.setAvailableBalance(5000);
-		status.setStatus("Success");
+		status.setStatus("Success ");
 		status.setTransactionId(123456);
 		return Response.status(200).entity(status).build();
 	}
