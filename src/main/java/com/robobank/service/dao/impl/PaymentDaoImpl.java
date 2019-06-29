@@ -6,11 +6,13 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.springframework.stereotype.Repository;
 
 import com.robobank.pojo.AccountInformation;
 import com.robobank.pojo.PaymentInfo;
 import com.robobank.service.dao.interf.IPaymentDao;
 
+@Repository
 public class PaymentDaoImpl implements IPaymentDao {
 
 	public AccountInformation processPayment(PaymentInfo paymentInfo) {

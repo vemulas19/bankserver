@@ -29,20 +29,7 @@ public class PaymentService {
 		System.out.println(paymentInfo.getHolderName());
 		
 		PaymentServiceDelegate paymentDelegate = new PaymentServiceDelegate();
-		AccountInformation accountInfo = paymentDelegate.processPayment(paymentInfo);
-		
-		if(accountInfo != null) {
-			TransactionStatus status = new TransactionStatus();
-			status.setAvailableBalance(accountInfo.getBalance()-paymentInfo.getAmt());
-			status.setTransactionId(12234456);
-			status.setStatus("Success");
-			return Response.status(200).entity(status).build();
-		} else {
-			TransactionStatus status = new TransactionStatus();
-			status.setTransactionId(56234456);
-			status.setStatus("Failed");
-			return Response.status(200).entity(status).build();
-		}
+		return paymentDelegate.processPayment(paymentInfo);
 	}
 
 	// http://localhost:8080/robobank/processData?name=Raju
