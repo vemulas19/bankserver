@@ -8,6 +8,8 @@ import com.robobank.pojo.ResponseException;
 import com.robobank.pojo.TransactionStatus;
 import com.robobank.service.dao.impl.PaymentDaoImpl;
 import com.robobank.service.dao.interf.IPaymentDao;
+import com.robobank.service.exception.InsufficientFundsException;
+import com.robobank.service.exception.InvalidInputException;
 
 public class PaymentServiceDelegate {
 
@@ -17,40 +19,37 @@ public class PaymentServiceDelegate {
 		
 		if(accountInfo == null) {
 			System.out.println("Invalid Card number entered!! We don't have entered card details!!");
-			ResponseException res = new ResponseException();
-			res.setErrorCode(001);
-			res.setErrorMessage("Invalid Card number entered!! We don't have entered card details!!");
-			return Response.status(500).entity(res).build();
+			throw new InvalidInputException(001, "Invalid Card number entered!! We don't have entered card details!!");
 		}		
 		if(!accountInfo.getCvv().equals(paymentInfo.getCvv())){
 			System.out.println("Invalid cvv entered!!");
-			ResponseException res = new ResponseException();
-			res.setErrorCode(002);
-			res.setErrorMessage("Invalid cvv entered!!");
-			return Response.status(500).entity(res).build();
+			throw new InvalidInputException(002, "Invalid cvv entered!!");
 		}
 		
 		if(!accountInfo.getExpDate().equals(paymentInfo.getExpDate())){
 			System.out.println("Invalid expiry date entered!!");
-			ResponseException res = new ResponseException();
-			res.setErrorCode(003);
-			res.setErrorMessage("Invalid expiry date entered!!");
-			return Response.status(500).entity(res).build();
+			throw new InvalidInputException(003, "Invalid expiry date entered!!");
 		}
 		if(accountInfo.getBalance() < paymentInfo.getAmt()) {
 			System.out.println("Insufficient funds in account!!");
-			ResponseException res = new ResponseException();
-			res.setErrorCode(004);
-			res.setErrorMessage("Insufficient funds in account!!");
-			return Response.status(500).entity(res).build();
+			throw new InsufficientFundsException(004, "Insufficient funds in account!!");
 		}
 		
 		TransactionStatus trans = new TransactionStatus();
 		double remainingBalance = accountInfo.getBalance() - paymentInfo.getAmt();
-		trans.setAvailableBalance(remainingBalance);
-		trans.setStatus("Success");
-		trans.setTransactionId(12345);
+		//update balance to database table(account_details)
 		
+		boolean isUpdateBalance = dao.updateBalance(accountInfo.getCardNumber(), remainingBalance);
+		if(isUpdateBalance) {
+			trans.setAvailableBalance(remainingBalance);
+			trans.setStatus("Success");
+			trans.setTransactionId(12345);			
+		} else {
+			trans.setAvailableBalance(accountInfo.getBalance());
+			trans.setStatus("Failed");
+			trans.setTransactionId(12346);
+		}
+			
 		return Response.status(200).entity(trans).build();
 	}
 }

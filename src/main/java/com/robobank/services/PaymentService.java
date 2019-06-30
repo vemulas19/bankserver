@@ -7,10 +7,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.robobank.pojo.AccountInformation;
 import com.robobank.pojo.PaymentInfo;
 import com.robobank.pojo.ResponseException;
 import com.robobank.pojo.TransactionStatus;
+import com.robobank.service.exception.DaoException;
+import com.robobank.service.exception.InsufficientFundsException;
+import com.robobank.service.exception.InvalidInputException;
 import com.robobank.service.impl.PaymentServiceDelegate;
 
 @Path("/")
@@ -29,7 +34,24 @@ public class PaymentService {
 		System.out.println(paymentInfo.getHolderName());
 		
 		PaymentServiceDelegate paymentDelegate = new PaymentServiceDelegate();
-		return paymentDelegate.processPayment(paymentInfo);
+		try {
+			return paymentDelegate.processPayment(paymentInfo);			
+		} catch(InvalidInputException iie) {
+			ResponseException res = new ResponseException();
+			res.setErrorCode(iie.getReasonCode());
+			res.setErrorMessage(iie.getMessage());
+			return Response.status(500).entity(res).build();
+		} catch(InsufficientFundsException isf) {
+			ResponseException res = new ResponseException();
+			res.setErrorCode(isf.getReasonCode());
+			res.setErrorMessage(isf.getMessage());
+			return Response.status(500).entity(res).build();
+		} catch(DaoException de) {
+			ResponseException res = new ResponseException();
+			res.setErrorCode(de.getReasonCode());
+			res.setErrorMessage(de.getMessage());
+			return Response.status(500).entity(res).build();
+		}
 	}
 
 	// http://localhost:8080/robobank/processData?name=Raju
