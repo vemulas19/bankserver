@@ -1,20 +1,29 @@
 package com.robobank.service.impl;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+
+import org.springframework.stereotype.Service;
 
 import com.robobank.pojo.AccountInformation;
 import com.robobank.pojo.PaymentInfo;
-import com.robobank.pojo.ResponseException;
 import com.robobank.pojo.TransactionStatus;
 import com.robobank.service.dao.impl.PaymentDaoImpl;
 import com.robobank.service.dao.interf.IPaymentDao;
 import com.robobank.service.exception.InsufficientFundsException;
 import com.robobank.service.exception.InvalidInputException;
 
+@Service
 public class PaymentServiceDelegate {
 
+	@Inject
+	IPaymentDao dao;
+
+	public PaymentServiceDelegate() {
+		System.out.println("Object created for PaymentServiceDelegate!!");
+	}
+	
 	public Response processPayment(PaymentInfo paymentInfo){
-		IPaymentDao dao = new PaymentDaoImpl();
 		AccountInformation accountInfo = dao.processPayment(paymentInfo);
 		
 		if(accountInfo == null) {
